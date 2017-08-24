@@ -1,5 +1,9 @@
 package com.ottogroup.emfavro
 
+import com.google.common.base.Preconditions
+import java.io.FileNotFoundException
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage
@@ -18,14 +22,24 @@ class GenModelLoader {
     }
 
     def GenModel load(String path) {
-        val absolutePath = Paths.get(path).toAbsolutePath
+        Preconditions.checkNotNull(path)
+
+        load(Paths.get(path))
+    }
+
+    def GenModel load(Path path) {
+        Preconditions.checkNotNull(path)
+
+        val absolutePath = path.toAbsolutePath
+        if (!Files.exists(absolutePath))
+            throw new FileNotFoundException(absolutePath.toString)
+
         val uri = URI.createFileURI(absolutePath.toString)
         val resource = resourceSet.getResource(uri, true)
 
-        if (resource.contents.isEmpty) {
-            throw new IllegalArgumentException("the genmodel file has no package");
-        }
-
+        val content = resource.contents.head
+        if (!(content instanceof GenModel))
+            throw new IllegalArgumentException("The loaded resource contains no GenModel")
         resource.contents.head as GenModel
     }
 }

@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EcorePackage
-import java.util.Set
 
 class IDLGenerator {
     package static val ERROR_MESSAGE_MISSING_GEN_PACKAGE = "The GenModel contains no GenPackage"
@@ -74,7 +73,7 @@ class IDLGenerator {
         }
     }
 
-    package def Set<EClassifier> findImplementations(EClassifier intrface, GenModel genModel) {
+    package def findImplementations(EClassifier intrface, GenModel genModel) {
         genModel.genPackages.map[getEcorePackage.EClassifiers]
             .flatten
             .filter[it instanceof EClass]
@@ -82,7 +81,7 @@ class IDLGenerator {
             .toSet
     }
 
-    package def boolean isImplementation(EClassifier classifier, EClass intrface) {
+    package def isImplementation(EClassifier classifier, EClass intrface) {
         if (classifier instanceof EClass) {
             return (!classifier.isAbstract) && (intrface.isSuperTypeOf(classifier));
         }
