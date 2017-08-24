@@ -13,8 +13,6 @@ import org.apache.maven.project.MavenProject
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 class Ecore2AvroMojo extends AbstractMojo {
-    private static val UTF8 = "UTF-8"
-
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private var MavenProject project;
 
@@ -34,7 +32,7 @@ class Ecore2AvroMojo extends AbstractMojo {
 
         val protocol = Ecore2Avro.convert(genModel)
         val outputPath = outputDirectory.toPath.resolve(protocol.name + ".avpr");
-        Files.write(outputPath, protocol.toString(true).getBytes(UTF8))
+        Files.write(outputPath, protocol.toString(true).getBytes)
 
         val resource = new Resource
         resource.setDirectory(outputDirectory.path)
