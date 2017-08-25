@@ -6,8 +6,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage
+import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
+import org.eclipse.emf.ecore.util.Diagnostician
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 
 class GenModelLoader {
@@ -33,6 +35,12 @@ class GenModelLoader {
         val content = resource.contents.head
         if (!(content instanceof GenModel))
             throw new IllegalArgumentException("The loaded resource contains no GenModel")
+
+        val diagnostic = Diagnostician.INSTANCE.validate(content)
+        if (diagnostic.severity != Diagnostic.OK) {
+            throw new IllegalStateException("The loaded GenModel is not valid: " + diagnostic.message)
+        }
+
         resource.contents.head as GenModel
     }
 }
