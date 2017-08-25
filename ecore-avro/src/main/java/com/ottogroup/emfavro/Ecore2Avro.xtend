@@ -52,7 +52,6 @@ class Ecore2Avro {
             case EcorePackage.Literals.ELONG: Schema.create(Schema.Type.LONG)
             case EcorePackage.Literals.EFLOAT: Schema.create(Schema.Type.FLOAT)
             case EcorePackage.Literals.EDOUBLE: Schema.create(Schema.Type.DOUBLE)
-            EEnum: eDataType.toAvroSchema(basePackage, genModel)
             default: Schema.create(Schema.Type.STRING)
         }
     }
