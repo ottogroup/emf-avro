@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage
 import org.eclipse.emf.common.util.URI
@@ -19,12 +18,6 @@ class GenModelLoader {
         val extensionMap = resourceSet.resourceFactoryRegistry.extensionToFactoryMap
         extensionMap.put("ecore", new EcoreResourceFactoryImpl)
         extensionMap.put("genmodel", new EcoreResourceFactoryImpl)
-    }
-
-    def GenModel load(String path) {
-        Preconditions.checkNotNull(path)
-
-        load(Paths.get(path))
     }
 
     def GenModel load(Path path) {

@@ -27,7 +27,7 @@ class Ecore2AvroMojo extends AbstractMojo {
         if (!genModel.exists) throw new FileNotFoundException(genModel.toString)
 
         val loader = new GenModelLoader
-        val genModel = loader.load(genModel.path)
+        val genModel = loader.load(genModel.toPath)
         log.info('''Processing «genModel.genPackages.size» GenPackages''')
 
         val protocol = Ecore2Avro.convert(genModel)

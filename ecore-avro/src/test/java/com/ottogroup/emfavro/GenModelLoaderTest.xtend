@@ -1,6 +1,7 @@
 package com.ottogroup.emfavro
 
 import java.io.FileNotFoundException
+import java.nio.file.Paths
 import org.junit.Before
 import org.junit.Test
 
@@ -18,7 +19,7 @@ class GenModelLoaderTest {
     @Test
     def void shouldThrowIfFileIsNotExistent() {
         // given
-        val path = "nonexisting_path"
+        val path = Paths.get("nonexisting_path")
 
         // when // then
         assertThatExceptionOfType(FileNotFoundException)
@@ -28,7 +29,7 @@ class GenModelLoaderTest {
     @Test
     def void shouldLoadEmptyGenModel() {
         // given
-        val path = getClass.getResource("/empty.genmodel").toURI.getPath
+        val path = Paths.get(getClass.getResource("/empty.genmodel").toURI)
 
         // when
         val genModel = loader.load(path)
@@ -42,7 +43,7 @@ class GenModelLoaderTest {
     @Test
     def void shouldThrowIfResourceContainsNoGenModel() {
         // given
-        val path = getClass.getResource("/empty.ecore").toURI.getPath
+        val path = Paths.get(getClass.getResource("/empty.ecore").toURI)
 
         // when // then
         assertThatExceptionOfType(IllegalArgumentException)
