@@ -16,10 +16,13 @@ import org.junit.Test
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType
+import static org.assertj.core.api.Assertions.tuple
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
-class IDLGeneratorTest {
+import org.apache.avro.Schema
+
+class Ecore2AvroTest {
 
     @Test
     def void shouldNotAcceptMissingGenPackage() {
@@ -27,12 +30,10 @@ class IDLGeneratorTest {
         val genModelMock = mock(GenModel)
         when(genModelMock.genPackages).thenReturn(new BasicEList)
         when(genModelMock.modelName).thenReturn("Test Model")
-        val idlGenerator = new IDLGenerator
 
         // when // then
         assertThatExceptionOfType(IllegalArgumentException)
-            .isThrownBy([idlGenerator.generateIdl(genModelMock)])
-            .withMessage(IDLGenerator.ERROR_MESSAGE_MISSING_GEN_PACKAGE)
+            .isThrownBy([Ecore2Avro.convert(genModelMock)])
     }
 
     @Test
@@ -49,10 +50,8 @@ class IDLGeneratorTest {
         val genPackage = mock(GenPackage)
         when(genPackage.getEcorePackage).thenReturn(ecorePackage)
 
-        val idlGenerator = new IDLGenerator
-
-        // when 
-        val classifiersToGenerate = idlGenerator.getClassifiersToGenerate(genPackage)
+        // when
+        val classifiersToGenerate = Ecore2Avro.getClassifiersToGenerate(genPackage)
         
         // then
 		assertThat(classifiersToGenerate).containsOnly(concreteClass)
@@ -70,10 +69,8 @@ class IDLGeneratorTest {
         val genPackage = mock(GenPackage)
         when(genPackage.getEcorePackage).thenReturn(ecorePackage)
 
-        val idlGenerator = new IDLGenerator
-
-        // when 
-        val classifiersToGenerate = idlGenerator.getClassifiersToGenerate(genPackage)
+        // when
+        val classifiersToGenerate = Ecore2Avro.getClassifiersToGenerate(genPackage)
         
         // then
 		assertThat(classifiersToGenerate).containsOnly(concreteClass)
@@ -109,19 +106,13 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-
         // when
-        val String idl = generator.idlTypeDefinition(enumMock, genPackageMock.basePackage, genModelMock).toString
+        val schema = Ecore2Avro.toAvroSchema(enumMock, genPackageMock.basePackage, genModelMock)
 
         // then
-        val String expected = '''
-        @namespace("com.base.package.leaf.avro")
-        enum TestEnum {
-            Literal1, Literal2, Literal3
-        }
-        '''
-        assertThat(idl).isEqualTo(expected)
+        assertThat(schema).isNotNull
+        assertThat(schema.type).isEqualTo(Schema.Type.ENUM)
+        assertThat(schema.getEnumSymbols).containsExactly("Literal1", "Literal2", "Literal3")
     }
 
     @Test
@@ -153,16 +144,22 @@ class IDLGeneratorTest {
         when(wrappingAttr.name).thenReturn("wrappingAttr")
         when(wrappingAttr.EAttributeType).thenReturn(ownDataTypeMock)
 
-        val generator = new IDLGenerator
-
         // when // then
-        assertThat(generator.findAvroType(booleanAttr, null, null)).isEqualTo("boolean")
-        assertThat(generator.findAvroType(intAttr, null, null)).isEqualTo("int")
-        assertThat(generator.findAvroType(longAttr, null, null)).isEqualTo("long")
-        assertThat(generator.findAvroType(floatAttr, null, null)).isEqualTo("float")
-        assertThat(generator.findAvroType(doubleAttr, null, null)).isEqualTo("double")
-        assertThat(generator.findAvroType(stringAttr, null, null)).isEqualTo("string")
-        assertThat(generator.findAvroType(wrappingAttr, null, null)).isEqualTo("string")
+        val booleanType = Ecore2Avro.toAvroField(booleanAttr, null, null).schema.type
+        val intType = Ecore2Avro.toAvroField(intAttr, null, null).schema.type
+        val longType = Ecore2Avro.toAvroField(longAttr, null, null).schema.type
+        val floatType = Ecore2Avro.toAvroField(floatAttr, null, null).schema.type
+        val doubleType = Ecore2Avro.toAvroField(doubleAttr, null, null).schema.type
+        val stringType = Ecore2Avro.toAvroField(stringAttr, null, null).schema.type
+        val wrappingType = Ecore2Avro.toAvroField(wrappingAttr, null, null).schema.type
+
+        assertThat(booleanType).isEqualTo(Schema.Type.BOOLEAN)
+        assertThat(intType).isEqualTo(Schema.Type.INT)
+        assertThat(longType).isEqualTo(Schema.Type.LONG)
+        assertThat(floatType).isEqualTo(Schema.Type.FLOAT)
+        assertThat(doubleType).isEqualTo(Schema.Type.DOUBLE)
+        assertThat(stringType).isEqualTo(Schema.Type.STRING)
+        assertThat(wrappingType).isEqualTo(Schema.Type.STRING)
     }
 
     @Test
@@ -174,6 +171,7 @@ class IDLGeneratorTest {
         val classMock = mock(EClass)
         when(classMock.name).thenReturn("TestClass")
         when(classMock.EPackage).thenReturn(ePackageMock)
+        when(classMock.EAllStructuralFeatures).thenReturn(new BasicEList)
 
         val ecorePackageMock = mock(EcorePackage)
         when(ecorePackageMock.EClassifiers).thenReturn(new BasicEList(#[classMock]))
@@ -198,13 +196,12 @@ class IDLGeneratorTest {
         when(containerClassMock.EPackage).thenReturn(otherPackageMock)
         when(containerClassMock.EAllStructuralFeatures).thenReturn(new BasicEList(#[ref]))
 
-        val generator = new IDLGenerator
-
-        // when 
-        val concreteAvroType = generator.findAvroType(ref, genPackageMock.basePackage, genModelMock)
+        // when
+        val referencedSchema = Ecore2Avro.toAvroField(ref, genPackageMock.basePackage, genModelMock).schema
         
         // then
-		assertThat(concreteAvroType).isEqualTo("com.base.package.leaf.avro.TestClass")
+        val testClassSchema = Ecore2Avro.toAvroSchema(classMock, genPackageMock.basePackage, genModelMock)
+		assertThat(referencedSchema).isEqualTo(testClassSchema)
     }
 
     @Test
@@ -222,11 +219,13 @@ class IDLGeneratorTest {
         val impl1 = mock(EClass)
         when(impl1.name).thenReturn("MyInterfaceImpl1")
         when(impl1.EPackage).thenReturn(ePackageMock)
+        when(impl1.EAllStructuralFeatures).thenReturn(new BasicEList)
         when(intrfaceMock.isSuperTypeOf(impl1)).thenReturn(true)
 
         val impl2 = mock(EClass)
         when(impl2.name).thenReturn("MyInterfaceImpl2")
         when(impl2.EPackage).thenReturn(ePackageMock)
+        when(impl2.EAllStructuralFeatures).thenReturn(new BasicEList)
         when(intrfaceMock.isSuperTypeOf(impl2)).thenReturn(true)
 
         val ref = mock(EReference)
@@ -249,14 +248,15 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-
-        // when 
-        val avroUnionType = generator.findAvroType(ref, genPackageMock.basePackage, genModelMock)
+        // when
+        val unionField = Ecore2Avro.toAvroField(ref, genPackageMock.basePackage, genModelMock)
         
         // then
-        val expected = "union { com.base.package.leaf.avro.MyInterfaceImpl1, com.base.package.leaf.avro.MyInterfaceImpl2 }"
-		assertThat(avroUnionType).isEqualTo(expected)
+        assertThat(unionField.name).isEqualTo("ref")
+        assertThat(unionField.schema.type).isEqualTo(Schema.Type.UNION)
+        val impl1Schema = Ecore2Avro.toAvroSchema(impl1, genPackageMock.basePackage, genModelMock)
+        val impl2Schema = Ecore2Avro.toAvroSchema(impl2, genPackageMock.basePackage, genModelMock)
+        assertThat(unionField.schema.types).containsExactly(impl1Schema, impl2Schema)
     }
     
     @Test
@@ -292,10 +292,8 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-        
         // when
-        val impls = generator.findImplementations(intrfaceMock, genModelMock)
+        val impls = Ecore2Avro.findImplementations(intrfaceMock, genModelMock)
         
         // then
         assertThat(impls).containsOnly(impl1)
@@ -322,6 +320,7 @@ class IDLGeneratorTest {
         val enumMock = mock(EEnum)
         when(enumMock.name).thenReturn("MyEnum")
         when(enumMock.EPackage).thenReturn(ePackageMock)
+        when(enumMock.ELiterals).thenReturn(new BasicEList)
 
         when(booleanAttr.name).thenReturn("booleanAttr")
         when(booleanAttr.EAttributeType).thenReturn(EcorePackage.Literals.EBOOLEAN)
@@ -358,26 +357,26 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-
         // when
-        val String idl = generator.idlTypeDefinition(classMock, genPackageMock.basePackage, genModelMock).toString
+        val schema = Ecore2Avro.toAvroSchema(classMock, genPackageMock.basePackage, genModelMock)
 
         // then
-        val String expected = '''
-        @namespace("com.base.package.leaf.avro")
-        record TestClass {
-            boolean booleanAttr;
-            int intAttr;
-            long longAttr;
-            float floatAttr;
-            double doubleAttr;
-            string stringAttr;
-            com.base.package.leaf.avro.MyEnum enumAttr;
-            string wrappingAttr;
-        }
-        '''
-        assertThat(idl).isEqualTo(expected)
+        assertThat(schema).isNotNull
+        assertThat(schema.namespace).isEqualTo("com.base.package.leaf.avro")
+        assertThat(schema.type).isEqualTo(Schema.Type.RECORD)
+        assertThat(schema.name).isEqualTo("TestClass")
+        assertThat(schema.getFields)
+            .hasSize(8)
+            .extracting("name", "schema.type")
+            .contains(
+                tuple("booleanAttr", Schema.Type.BOOLEAN),
+                tuple("intAttr", Schema.Type.INT),
+                tuple("longAttr", Schema.Type.LONG),
+                tuple("floatAttr", Schema.Type.FLOAT),
+                tuple("doubleAttr", Schema.Type.DOUBLE),
+                tuple("stringAttr", Schema.Type.STRING),
+                tuple("enumAttr", Schema.Type.ENUM),
+                tuple("wrappingAttr", Schema.Type.STRING))
     }
     
     @Test
@@ -392,10 +391,8 @@ class IDLGeneratorTest {
         when(impl1.name).thenReturn("MyInterfaceImpl1")
         when(intrfaceMock.isSuperTypeOf(impl1)).thenReturn(true)
         
-        val generator = new IDLGenerator
-        
         // when
-		val isInterface = generator.isImplementation(impl1, intrfaceMock)
+		val isInterface = Ecore2Avro.isImplementation(impl1, intrfaceMock)
 		
 		// then
 		assertThat(isInterface).isTrue        
@@ -413,10 +410,8 @@ class IDLGeneratorTest {
         when(impl1.name).thenReturn("MyInterfaceImpl1")
         when(intrfaceMock.isSuperTypeOf(impl1)).thenReturn(false)
         
-        val generator = new IDLGenerator
-        
         // when
-		val isInterface = generator.isImplementation(impl1, intrfaceMock)
+		val isInterface = Ecore2Avro.isImplementation(impl1, intrfaceMock)
 		
 		// then
 		assertThat(isInterface).isFalse        
@@ -484,19 +479,18 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-
         // when
-        val String idl = generator.idlTypeDefinition(containerClassMock, genPackageMock.basePackage, genModelMock).toString
+        val schema = Ecore2Avro.toAvroSchema(containerClassMock, genPackageMock.basePackage, genModelMock)
 
         // then
-        val String expected = '''
-        @namespace("com.base.package.other.avro")
-        record ContainerClass {
-            com.base.package.leaf.avro.TestClass ref;
-        }
-        '''
-        assertThat(idl).isEqualTo(expected)
+        assertThat(schema).isNotNull
+        assertThat(schema.namespace).isEqualTo("com.base.package.other.avro")
+        assertThat(schema.name).isEqualTo("ContainerClass")
+        assertThat(schema.fields).hasSize(1)
+        assertThat(schema.getField("ref")).isNotNull
+        assertThat(schema.getField("ref").schema.type).isEqualTo(Schema.Type.RECORD)
+        val testClassSchema = Ecore2Avro.toAvroSchema(classMock, genPackageMock.basePackage, genModelMock)
+        assertThat(schema.getField("ref").schema).isEqualTo(testClassSchema)
     }
     
     @Test
@@ -526,19 +520,19 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-        
         // when
-        val String idl = generator.idlTypeDefinition(classMock, genPackageMock.basePackage, genModelMock).toString
-        
+        val schema = Ecore2Avro.toAvroSchema(classMock, genPackageMock.basePackage, genModelMock)
+
         // then
-        val expected = '''
-        @namespace("com.base.package.leaf.avro")
-        record TestClass {
-            array<string> listOfStrings;
-        }
-        '''
-        assertThat(idl).isEqualTo(expected)
+        assertThat(schema).isNotNull
+        assertThat(schema.namespace).isEqualTo("com.base.package.leaf.avro")
+        assertThat(schema.name).isEqualTo("TestClass")
+        assertThat(schema.getFields).hasSize(1)
+        val listField = schema.getField("listOfStrings")
+        assertThat(listField).isNotNull
+        assertThat(listField.name).isEqualTo("listOfStrings")
+        assertThat(listField.schema.type).isEqualTo(Schema.Type.ARRAY)
+        assertThat(listField.schema.elementType).isEqualTo(Schema.create(Schema.Type.STRING))
     }
 
     @Test
@@ -644,43 +638,52 @@ class IDLGeneratorTest {
         when(genModelMock.modelName).thenReturn("TestModel")
         when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
 
-        val generator = new IDLGenerator
-
         // when
-        val idl = generator.generateIdl(genModelMock)
-        val expected = '''
-        @namespace("com.base.package")
-        protocol TestModel {
-            @namespace("com.base.package.leaf.avro")
-            record TestClass {
-                boolean booleanAttr;
-                int intAttr;
-                long longAttr;
-                float floatAttr;
-                double doubleAttr;
-                string stringAttr;
-                com.base.package.leaf.avro.TestEnum enumAttr;
-                string wrappingAttr;
-            }
-            @namespace("com.base.package.other.avro")
-            record ContainerClass {
-                array<com.base.package.leaf.avro.TestClass> ref;
-                union { com.base.package.leaf.avro.MyInterfaceImpl1, com.base.package.leaf.avro.MyInterfaceImpl2 } uRef;
-            }
-            @namespace("com.base.package.leaf.avro")
-            enum TestEnum {
-                Literal1, Literal2, Literal3
-            }
-            @namespace("com.base.package.leaf.avro")
-            record MyInterfaceImpl1 {
-            }
-            @namespace("com.base.package.leaf.avro")
-            record MyInterfaceImpl2 {
-            }
-        }
-        '''
+        val protocol = Ecore2Avro.convert(genModelMock)
 
         // then
-        assertThat(idl).isEqualTo(expected)
+        assertThat(protocol).isNotNull
+        assertThat(protocol.namespace).isEqualTo("com.base.package")
+        assertThat(protocol.name).isEqualTo("TestModel")
+        assertThat(protocol.types).hasSize(5)
+
+        val testClassSchema = protocol.getType("com.base.package.leaf.avro.TestClass")
+        assertThat(testClassSchema).isNotNull
+        assertThat(testClassSchema.type).isEqualTo(Schema.Type.RECORD)
+        assertThat(testClassSchema.getFields)
+            .hasSize(8)
+            .extracting("name", "schema.type")
+            .contains(
+                tuple("booleanAttr", Schema.Type.BOOLEAN),
+                tuple("intAttr", Schema.Type.INT),
+                tuple("longAttr", Schema.Type.LONG),
+                tuple("floatAttr", Schema.Type.FLOAT),
+                tuple("doubleAttr", Schema.Type.DOUBLE),
+                tuple("stringAttr", Schema.Type.STRING),
+                tuple("enumAttr", Schema.Type.ENUM),
+                tuple("wrappingAttr", Schema.Type.STRING))
+
+        val containerClassSchema = protocol.getType("com.base.package.other.avro.ContainerClass")
+        assertThat(containerClassSchema).isNotNull
+        assertThat(containerClassSchema.type).isEqualTo(Schema.Type.RECORD)
+        assertThat(containerClassSchema.fields).hasSize(2)
+        val refField = containerClassSchema.getField("ref")
+        assertThat(refField.schema.type).isEqualTo(Schema.Type.ARRAY)
+        assertThat(refField.schema.elementType).isEqualTo(testClassSchema)
+        val unionField = containerClassSchema.getField("uRef")
+        assertThat(unionField.schema.type).isEqualTo(Schema.Type.UNION)
+
+        val testEnumSchema = protocol.getType("com.base.package.leaf.avro.TestEnum")
+        assertThat(testEnumSchema.type).isEqualTo(Schema.Type.ENUM)
+        assertThat(testEnumSchema.enumSymbols).containsExactly("Literal1", "Literal2", "Literal3")
+        assertThat(testClassSchema.getField("enumAttr").schema).isEqualTo(testEnumSchema)
+
+        val impl1Schema = protocol.getType("com.base.package.leaf.avro.MyInterfaceImpl1")
+        assertThat(impl1Schema.type).isEqualTo(Schema.Type.RECORD)
+
+        val impl2Schema = protocol.getType("com.base.package.leaf.avro.MyInterfaceImpl2")
+        assertThat(impl2Schema.type).isEqualTo(Schema.Type.RECORD)
+
+        assertThat(unionField.schema.types).containsExactly(impl1Schema, impl2Schema)
     }
 }
