@@ -46,7 +46,11 @@ class IDLGenerator {
         @namespace("«basePackage».«eClass.EPackage.name».avro")
         record «eClass.name» {
             «FOR EStructuralFeature feature : eClass.EAllStructuralFeatures»
+            «IF feature.upperBound > 1 || feature.upperBound == -1»
+            array<«feature.findAvroType(basePackage, genModel)»> «feature.name»;
+            «ELSE»
             «feature.findAvroType(basePackage, genModel)» «feature.name»;
+            «ENDIF»
             «ENDFOR»
         }
     '''

@@ -498,6 +498,48 @@ class IDLGeneratorTest {
         '''
         assertThat(idl).isEqualTo(expected)
     }
+    
+    @Test
+    def void shouldGenerateListTypesCorrectly() {
+        // given
+        val listOfStrings = mock(EAttribute)
+        when(listOfStrings.name).thenReturn("listOfStrings")
+        when(listOfStrings.upperBound).thenReturn(-1)
+        when(listOfStrings.EAttributeType).thenReturn(EcorePackage.Literals.ESTRING)
+
+        val ePackageMock = mock(EPackage)
+        when(ePackageMock.name).thenReturn("leaf")
+
+        val classMock = mock(EClass)
+        when(classMock.name).thenReturn("TestClass")
+        when(classMock.EPackage).thenReturn(ePackageMock)
+        when(classMock.EAllStructuralFeatures).thenReturn(new BasicEList(#[listOfStrings]))
+
+        val ecorePackageMock = mock(EcorePackage)
+        when(ecorePackageMock.EClassifiers).thenReturn(new BasicEList(#[classMock]))
+
+        val genPackageMock = mock(GenPackage)
+        when(genPackageMock.basePackage).thenReturn("com.base.package")
+        when(genPackageMock.getEcorePackage).thenReturn(ecorePackageMock)
+
+        val genModelMock = mock(GenModel)
+        when(genModelMock.modelName).thenReturn("TestModel")
+        when(genModelMock.genPackages).thenReturn(new BasicEList(#[genPackageMock]))
+
+        val generator = new IDLGenerator
+        
+        // when
+        val String idl = generator.idlTypeDefinition(classMock, genPackageMock.basePackage, genModelMock).toString
+        
+        // then
+        val expected = '''
+        @namespace("com.base.package.leaf.avro")
+        record TestClass {
+            array<string> listOfStrings;
+        }
+        '''
+        assertThat(idl).isEqualTo(expected)
+    }
 
     @Test
     def void shouldGenerateCompleteProtocol() {
@@ -576,6 +618,7 @@ class IDLGeneratorTest {
 
         val ref = mock(EReference)
         when(ref.name).thenReturn("ref")
+        when(ref.upperBound).thenReturn(5)
         when(ref.EReferenceType).thenReturn(classMock)
 
         val union = mock(EReference)
@@ -621,7 +664,7 @@ class IDLGeneratorTest {
             }
             @namespace("com.base.package.other.avro")
             record ContainerClass {
-                com.base.package.leaf.avro.TestClass ref;
+                array<com.base.package.leaf.avro.TestClass> ref;
                 union { com.base.package.leaf.avro.MyInterfaceImpl1, com.base.package.leaf.avro.MyInterfaceImpl2 } uRef;
             }
             @namespace("com.base.package.leaf.avro")
