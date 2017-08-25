@@ -4,7 +4,6 @@ import org.apache.avro.Protocol
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import org.junit.Test
@@ -18,8 +17,14 @@ class EObject2RecordTest {
     @Test
     def void shouldThrowIfMissingSchemaInProtocol() {
         // given
-        val eClass = mock(EClass)
-        when(eClass.instanceTypeName).thenReturn("test.MissingClass")
+        val eClass = EcoreFactory.eINSTANCE.createEClass
+        eClass.name = "MissingClass"
+
+        val ePackage = EcoreFactory.eINSTANCE.createEPackage
+        ePackage.name = "test"
+        ePackage.nsPrefix = "test"
+        ePackage.nsURI = "http://ottogroup.com/test"
+        ePackage.EClassifiers.add(eClass)
 
         val protocol = mock(Protocol)
         when(protocol.getType("test.avro.Class")).thenReturn(mock(Schema))
@@ -33,8 +38,14 @@ class EObject2RecordTest {
     @Test
     def void shouldFindSchemaInProtocol() {
         // given
-        val eClass = mock(EClass)
-        when(eClass.instanceTypeName).thenReturn("test.Class")
+        val eClass = EcoreFactory.eINSTANCE.createEClass
+        eClass.name = "Class"
+
+        val ePackage = EcoreFactory.eINSTANCE.createEPackage
+        ePackage.name = "test"
+        ePackage.nsPrefix = "test"
+        ePackage.nsURI = "http://ottogroup.com/test"
+        ePackage.EClassifiers.add(eClass)
 
         val schema = mock(Schema)
         when(schema.namespace).thenReturn("test.avro")
@@ -52,7 +63,7 @@ class EObject2RecordTest {
     }
 
     @Test
-    def void shouldConvertPrimitesCorrectly() {
+    def void shouldConvertPrimitivesCorrectly() {
         // given
         val eClass = EcoreFactory.eINSTANCE.createEClass
         eClass.name = "Primitives"
@@ -168,7 +179,7 @@ class EObject2RecordTest {
         ePackage.nsPrefix = "test"
         ePackage.nsURI = "http://ottogroup.com/test"
 
-        ePackage.EClassifiers.add(eClass)
+        ePackage.EClassifiers.addAll(#[eClass, eEnum])
 
         val eObject = ePackage.EFactoryInstance.create(eClass)
         eObject.eSet(enumAttr, eLiteral)

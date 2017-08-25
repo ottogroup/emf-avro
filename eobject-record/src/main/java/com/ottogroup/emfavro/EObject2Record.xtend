@@ -41,10 +41,16 @@ class EObject2Record {
     }
 
     package static def Schema findAvroSchema(EClassifier eClass, Protocol protocol) {
-        val instanceTypeName = eClass.instanceTypeName
-        val avroTypeName = new StringBuilder(instanceTypeName)
-            .insert(instanceTypeName.lastIndexOf("."), ".avro").toString
+        val builder = new StringBuilder
+        if (!(protocol.namespace.isNullOrEmpty)) {
+            builder.append(protocol.namespace)
+            builder.append('.')
+        }
+        builder.append(eClass.EPackage.name)
+        builder.append(".avro.")
+        builder.append(eClass.name)
 
+        val avroTypeName = builder.toString
         val schema = protocol.getType(avroTypeName)
         if (schema === null) throw new SchemaNotFoundException(protocol, avroTypeName)
 
