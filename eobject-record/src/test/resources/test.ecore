@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="test" nsURI="http://ottogroup.com/test"
+                nsPrefix="test">
+  <eClassifiers xsi:type="ecore:EEnum" name="WeekDay">
+    <eLiterals name="MONDAY"/>
+    <eLiterals name="TUESDAY"/>
+    <eLiterals name="WEDNESDAY"/>
+    <eLiterals name="THURSDAY"/>
+    <eLiterals name="FRIDAY"/>
+    <eLiterals name="SATURDAY" literal=""/>
+    <eLiterals name="SUNDAY"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Primitives">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="booleanAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="intAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="longAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="floatAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="doubleAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stringAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="weekDay" eType="#//WeekDay"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Referencer">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listOfReferences" upperBound="5"
+        eType="#//Primitives"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="anotherReference" eType="#//Interface"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Interface" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="InterfaceImpl1" eSuperTypes="#//Interface">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="size" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="InterfaceImpl2" eSuperTypes="#//InterfaceImpl1">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="count" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
+  </eClassifiers>
+</ecore:EPackage>

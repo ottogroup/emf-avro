@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="ASCII"?>
+<test:Primitives xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:test="http://ottogroup.com/test" booleanAttr="true" intAttr="42" longAttr="1337" floatAttr="3.14" doubleAttr="123.456789" stringAttr="foo" weekDay="FRIDAY"/>
