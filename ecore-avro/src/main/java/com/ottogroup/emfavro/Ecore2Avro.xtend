@@ -1,5 +1,6 @@
 package com.ottogroup.emfavro
 
+import com.google.common.base.Preconditions
 import org.apache.avro.Protocol
 import org.apache.avro.Schema
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
@@ -11,7 +12,6 @@ import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EcorePackage
-import com.google.common.base.Preconditions
 
 class Ecore2Avro {
     static def Protocol convert(GenModel genModel) {
@@ -72,7 +72,7 @@ class Ecore2Avro {
             schema = Schema.createArray(schema)
         }
 
-        new Schema.Field(eRef.name, schema, null, eRef.defaultValue)
+        new Schema.Field(eRef.name, schema, null, null as Object)
     }
 
     package static def dispatch Schema.Field toAvroField(EAttribute eAttr, String basePackage, GenModel genModel) {
@@ -81,7 +81,7 @@ class Ecore2Avro {
             schema = Schema.createArray(schema)
         }
 
-        new Schema.Field(eAttr.name, schema, null, eAttr.defaultValue)
+        new Schema.Field(eAttr.name, schema, null, null as Object)
     }
 
     package static def findImplementations(EClassifier intrface, GenModel genModel) {
