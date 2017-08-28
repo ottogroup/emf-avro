@@ -1,6 +1,6 @@
 package com.ottogroup.emfavro
 
-import com.google.common.base.Preconditions
+import java.util.Objects
 import org.apache.avro.Protocol
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
@@ -13,8 +13,8 @@ import org.eclipse.emf.ecore.EObject
 
 class EObject2Record {
     static def GenericRecord convert(EObject eObject, Protocol protocol) {
-        Preconditions.checkNotNull(eObject)
-        Preconditions.checkNotNull(protocol)
+        Objects.requireNonNull(eObject, ["eObject is null"])
+        Objects.requireNonNull(protocol, ["protocol is null"])
 
         val genericData = new GenericData()
         val schema = findAvroSchema(eObject.eClass, protocol)

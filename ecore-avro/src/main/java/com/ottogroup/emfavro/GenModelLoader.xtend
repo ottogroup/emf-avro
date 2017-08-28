@@ -1,29 +1,28 @@
 package com.ottogroup.emfavro
 
-import com.google.common.base.Preconditions
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.Objects
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.util.Diagnostician
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 
 class GenModelLoader {
-    private val resourceSet = new ResourceSetImpl()
+    static def GenModel load(Path path) {
+        Objects.requireNonNull(path, ["path is null"])
 
-    new () {
-        GenModelPackage.eINSTANCE.eClass
-        val extensionMap = resourceSet.resourceFactoryRegistry.extensionToFactoryMap
-        extensionMap.put("ecore", new EcoreResourceFactoryImpl)
-        extensionMap.put("genmodel", new EcoreResourceFactoryImpl)
-    }
+        // triggers GenModelPackageImpl.init()
+        GenModelPackage.eINSTANCE.genModel
 
-    def GenModel load(Path path) {
-        Preconditions.checkNotNull(path)
+        val resourceSet = new ResourceSetImpl
+        resourceSet.resourceFactoryRegistry.extensionToFactoryMap
+            .put(Resource.Factory.Registry.DEFAULT_EXTENSION, new EcoreResourceFactoryImpl)
 
         val absolutePath = path.toAbsolutePath
         if (!Files.exists(absolutePath))
@@ -38,9 +37,16 @@ class GenModelLoader {
 
         val diagnostic = Diagnostician.INSTANCE.validate(content)
         if (diagnostic.severity != Diagnostic.OK) {
-            throw new IllegalStateException("The loaded GenModel is not valid: " + diagnostic.message)
+            throw new IllegalStateException("The loaded GenModel is not valid: " + diagnostic.format)
         }
 
-        resource.contents.head as GenModel
+        content as GenModel
     }
+
+    package static def CharSequence format(Diagnostic diagnostic) '''
+        «diagnostic.message»
+        «FOR child : diagnostic.children»
+            «child.format»
+        «ENDFOR»
+    '''
 }

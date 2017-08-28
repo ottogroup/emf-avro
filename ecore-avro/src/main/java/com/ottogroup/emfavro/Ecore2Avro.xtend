@@ -1,6 +1,7 @@
 package com.ottogroup.emfavro
 
 import com.google.common.base.Preconditions
+import java.util.Objects
 import org.apache.avro.Protocol
 import org.apache.avro.Schema
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
@@ -15,6 +16,7 @@ import org.eclipse.emf.ecore.EcorePackage
 
 class Ecore2Avro {
     static def Protocol convert(GenModel genModel) {
+        Objects.requireNonNull(genModel, ["genModel is null'"])
         Preconditions.checkArgument(!genModel.genPackages.empty)
 
         val protocol = new Protocol(genModel.modelName, genModel.genPackages.head.basePackage)

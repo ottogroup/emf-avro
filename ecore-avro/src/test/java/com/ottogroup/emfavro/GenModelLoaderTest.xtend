@@ -2,20 +2,12 @@ package com.ottogroup.emfavro
 
 import java.io.FileNotFoundException
 import java.nio.file.Paths
-import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType
 
 class GenModelLoaderTest {
-    private var GenModelLoader loader
-
-    @Before
-    def void setUp() {
-        loader = new GenModelLoader
-    }
-
     @Test
     def void shouldThrowIfFileIsNotExistent() {
         // given
@@ -23,7 +15,8 @@ class GenModelLoaderTest {
 
         // when // then
         assertThatExceptionOfType(FileNotFoundException)
-            .isThrownBy[loader.load(path)]
+            .isThrownBy[GenModelLoader::load(path)]
+            .withMessageEndingWith("/nonexisting_path")
     }
 
     @Test
@@ -32,7 +25,7 @@ class GenModelLoaderTest {
         val path = Paths.get(getClass.getResource("/empty.genmodel").toURI)
 
         // when
-        val genModel = loader.load(path)
+        val genModel = GenModelLoader::load(path)
 
         // then
         assertThat(genModel).isNotNull
@@ -46,8 +39,8 @@ class GenModelLoaderTest {
         val path = Paths.get(getClass.getResource("/empty.ecore").toURI)
 
         // when // then
-        assertThatExceptionOfType(IllegalArgumentException)
-            .isThrownBy[loader.load(path)]
+        assertThatExceptionOfType(RuntimeException)
+            .isThrownBy[GenModelLoader::load(path)]
     }
     
     

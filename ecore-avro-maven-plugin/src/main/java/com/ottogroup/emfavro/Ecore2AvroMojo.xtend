@@ -1,7 +1,6 @@
 package com.ottogroup.emfavro
 
 import java.io.File
-import java.io.FileNotFoundException
 import java.nio.file.Files
 import org.apache.maven.model.Resource
 import org.apache.maven.plugin.AbstractMojo
@@ -11,7 +10,7 @@ import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
 
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 class Ecore2AvroMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private var MavenProject project;
@@ -23,15 +22,14 @@ class Ecore2AvroMojo extends AbstractMojo {
     private var File outputDirectory;
 
     def override void execute() throws MojoExecutionException {
-        if (!outputDirectory.exists) outputDirectory.mkdirs
-        if (!genModel.exists) throw new FileNotFoundException(genModel.toString)
-
-        val loader = new GenModelLoader
-        val genModel = loader.load(genModel.toPath)
+        val genModel = GenModelLoader::load(genModel.toPath)
         log.info('''Processing «genModel.genPackages.size» GenPackages''')
 
         val protocol = Ecore2Avro.convert(genModel)
-        val outputPath = outputDirectory.toPath.resolve(protocol.name + ".avpr");
+        val outputPath = (protocol.namespace.split("\\.") + #[protocol.name + ".avpr"])
+            .fold(outputDirectory.toPath, [a, b | a.resolve(b)])
+
+        Files.createDirectories(outputPath.parent)
         Files.write(outputPath, protocol.toString(true).getBytes)
 
         val resource = new Resource

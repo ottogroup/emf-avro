@@ -4,7 +4,7 @@
     rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container" importerID="org.eclipse.emf.importer.ecore"
     complianceLevel="8.0" copyrightFields="false" operationReflection="true" importOrganizing="true">
   <foreignModel>Test.ecore</foreignModel>
-  <genPackages prefix="Test" disposableProviderFactory="true" ecorePackage="Test.ecore#/">
+  <genPackages prefix="Test" basePackage="base" disposableProviderFactory="true" ecorePackage="Test.ecore#/">
     <genClasses ecoreClass="Test.ecore#//AClass">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Test.ecore#//AClass/value"/>
     </genClasses>

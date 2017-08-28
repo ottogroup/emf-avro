@@ -15,7 +15,7 @@ class SchemaAndInstanceIT {
     def void shouldConvertXMIPrimitivesToAvroCorrectly() {
         // given
         val genModelPath = Paths.get(getClass.getResource("/test.genmodel").toURI)
-        val genModel = new GenModelLoader().load(genModelPath)
+        val genModel = GenModelLoader::load(genModelPath)
         val testPackage = genModel.genPackages.head.getEcorePackage
         EPackage.Registry.INSTANCE.put(testPackage.nsURI, testPackage)
 
