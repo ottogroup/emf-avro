@@ -9,6 +9,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType
 
 class GenModelLoaderTest {
     @Test
+    def void shouldThrowNPEForNullParameter() {
+        // when // then
+        assertThatExceptionOfType(NullPointerException).isThrownBy[GenModelLoader::load(null)]
+    }
+
+    @Test
     def void shouldThrowIfFileIsNotExistent() {
         // given
         val path = Paths.get("nonexisting_path")

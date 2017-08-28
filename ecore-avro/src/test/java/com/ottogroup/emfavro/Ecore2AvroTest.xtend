@@ -1,6 +1,7 @@
 package com.ottogroup.emfavro
 
 import java.util.Date
+import org.apache.avro.Schema
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage
 import org.eclipse.emf.common.util.BasicEList
@@ -20,9 +21,12 @@ import static org.assertj.core.api.Assertions.tuple
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
-import org.apache.avro.Schema
-
 class Ecore2AvroTest {
+    @Test
+    def void shouldThrowNPEForNullParameter() {
+        // when // then
+        assertThatExceptionOfType(NullPointerException).isThrownBy[Ecore2Avro.convert(null)]
+    }
 
     @Test
     def void shouldNotAcceptMissingGenPackage() {
@@ -33,7 +37,7 @@ class Ecore2AvroTest {
 
         // when // then
         assertThatExceptionOfType(IllegalArgumentException)
-            .isThrownBy([Ecore2Avro.convert(genModelMock)])
+            .isThrownBy[Ecore2Avro.convert(genModelMock)]
     }
 
     @Test

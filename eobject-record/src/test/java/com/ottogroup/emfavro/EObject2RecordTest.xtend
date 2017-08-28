@@ -4,6 +4,7 @@ import org.apache.avro.Protocol
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
 import org.junit.Test
@@ -14,6 +15,17 @@ import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
 class EObject2RecordTest {
+    @Test
+    def void shouldThrowNPEForNullParameters() {
+        // given
+        val protocol = mock(Protocol)
+        val eobject = mock(EObject)
+
+        // when // then
+        assertThatExceptionOfType(NullPointerException).isThrownBy[EObject2Record::convert(null, protocol)]
+        assertThatExceptionOfType(NullPointerException).isThrownBy[EObject2Record::convert(eobject, null)]
+    }
+
     @Test
     def void shouldThrowIfMissingSchemaInProtocol() {
         // given
