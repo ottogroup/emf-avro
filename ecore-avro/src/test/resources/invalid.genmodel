@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelName="Test">
+    <genPackages>
+        <foo>bar</foo>
+    </genPackages>
+</genmodel:GenModel>

@@ -6,11 +6,9 @@ import java.nio.file.Path
 import java.util.Objects
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage
-import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.emf.ecore.util.Diagnostician
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 
 class GenModelLoader {
@@ -30,23 +28,10 @@ class GenModelLoader {
 
         val uri = URI.createFileURI(absolutePath.toString)
         val resource = resourceSet.getResource(uri, true)
-
         val content = resource.contents.head
         if (!(content instanceof GenModel))
             throw new IllegalArgumentException("The loaded resource contains no GenModel")
 
-        val diagnostic = Diagnostician.INSTANCE.validate(content)
-        if (diagnostic.severity != Diagnostic.OK) {
-            throw new IllegalStateException("The loaded GenModel is not valid: " + diagnostic.format)
-        }
-
         content as GenModel
     }
-
-    package static def CharSequence format(Diagnostic diagnostic) '''
-        «diagnostic.message»
-        «FOR child : diagnostic.children»
-            «child.format»
-        «ENDFOR»
-    '''
 }

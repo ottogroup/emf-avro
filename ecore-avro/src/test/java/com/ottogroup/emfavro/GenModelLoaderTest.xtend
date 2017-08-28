@@ -2,6 +2,7 @@ package com.ottogroup.emfavro
 
 import java.io.FileNotFoundException
 import java.nio.file.Paths
+import org.eclipse.emf.common.util.WrappedException
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.assertThat
@@ -23,6 +24,16 @@ class GenModelLoaderTest {
         assertThatExceptionOfType(FileNotFoundException)
             .isThrownBy[GenModelLoader::load(path)]
             .withMessageEndingWith("/nonexisting_path")
+    }
+
+    @Test
+    def void shouldThrowIfGenModelIsInvalid() {
+        // given
+        val path = Paths.get(getClass.getResource("/invalid.genmodel").toURI)
+        
+        // when // then
+        assertThatExceptionOfType(WrappedException)
+            .isThrownBy[GenModelLoader::load(path)]
     }
 
     @Test
