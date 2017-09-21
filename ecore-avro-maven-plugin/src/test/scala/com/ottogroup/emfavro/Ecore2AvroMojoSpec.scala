@@ -8,7 +8,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.scalatest._
 
-class Ecore2AvroMojoTest extends fixture.FlatSpec with GivenWhenThen with Matchers {
+class Ecore2AvroMojoSpec extends fixture.FlatSpec with GivenWhenThen with Matchers {
   private val unitdir = new File("src/test/resources/unit")
 
   type FixtureParam = MojoRule

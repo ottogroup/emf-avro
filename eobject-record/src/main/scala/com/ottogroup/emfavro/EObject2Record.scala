@@ -39,13 +39,15 @@ object EObject2Record {
           val enumSchema = findAvroSchema(eEnum, protocol)
           val symbol = genericData.createEnum(literal.getName, enumSchema)
           builder.set(attr.getName, symbol)
-        case _ =>
-          builder.set(attr.getName, eObject.eGet(attr))
+        case EcorePackage.Literals.EBOOLEAN | EcorePackage.Literals.EINT |
+          EcorePackage.Literals.ELONG | EcorePackage.Literals.EFLOAT |
+          EcorePackage.Literals.EDOUBLE => builder.set(attr.getName, eObject.eGet(attr))
+        case _ => builder.set(attr.getName, eObject.eGet(attr).toString)
       }
     }
 
     eObject.eClass.getEAllReferences.forEach { ref =>
-      val referencedRecord = convert(eObject.eGet(ref).asInstanceOf, protocol)
+      val referencedRecord = convert(eObject.eGet(ref).asInstanceOf[EObject], protocol)
       builder.set(ref.getName, referencedRecord)
     }
 
