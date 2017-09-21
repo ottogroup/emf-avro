@@ -23,6 +23,10 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.xtend</groupId>
                 <artifactId>xtend-maven-plugin</artifactId>
             </plugin>
