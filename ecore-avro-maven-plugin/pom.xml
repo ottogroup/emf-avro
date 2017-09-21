@@ -56,8 +56,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.eclipse.xtend</groupId>
-                <artifactId>xtend-maven-plugin</artifactId>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-plugin-plugin</artifactId>
@@ -68,7 +68,6 @@
                 </configuration>
                 <executions>
                     <execution>
-	                	<?m2e ignore?>
                         <id>mojo-descriptor</id>
                         <goals>
                             <goal>descriptor</goal>
