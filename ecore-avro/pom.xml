@@ -22,13 +22,6 @@
             <artifactId>org.eclipse.emf.codegen.ecore</artifactId>
             <version>${emf.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jdt</groupId>
-            <artifactId>org.eclipse.jdt.core</artifactId>
-            <version>3.12.3</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
