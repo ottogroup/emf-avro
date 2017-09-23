@@ -67,7 +67,7 @@ class Ecore2AvroSpec extends FlatSpec with Matchers with GivenWhenThen {
     genPackage.setEcorePackage(ecorePackage)
 
     When("it is converted to a schema")
-    val schema = Ecore2Avro.toAvroSchema(enum, "base", null)
+    val schema = Ecore2Avro.toAvroSchema(enum, genPackage.getBasePackage)
 
     Then("it should be of schema type ENUM and have the three literals")
     schema shouldNot be(null)

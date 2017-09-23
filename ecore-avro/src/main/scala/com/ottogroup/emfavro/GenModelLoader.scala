@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 
 object GenModelLoader {
+  @throws[FileNotFoundException]
   def load(path: Path): GenModel = {
     require(path != null, "path must not be null")
 

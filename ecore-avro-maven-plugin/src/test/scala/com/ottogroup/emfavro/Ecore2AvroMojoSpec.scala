@@ -1,7 +1,8 @@
 package com.ottogroup.emfavro
 
-import java.io.{File, FileNotFoundException}
+import java.io.File
 
+import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugin.testing.MojoRule
 import org.apache.maven.project.MavenProject
 import org.junit.runner.Description
@@ -41,7 +42,7 @@ class Ecore2AvroMojoSpec extends fixture.FlatSpec with GivenWhenThen with Matche
     outputFile should exist
   }
 
-  it should "throw a FileNotFoundException for a nonexisting genmodel" in { rule =>
+  it should "throw a MojoFailureException for a nonexisting genmodel" in { rule =>
     Given("A configured mojo pointing at a nonexisting genmodel file")
     val basedir = new File(unitdir, "nonexisting_genmodel")
     val mojo = rule.lookupMojo("generate", new File(basedir, "pom.xml"))
@@ -49,7 +50,7 @@ class Ecore2AvroMojoSpec extends fixture.FlatSpec with GivenWhenThen with Matche
 
     When("The mojo is executed")
     Then("A FileNotFoundException should be thrown")
-    a [FileNotFoundException] should be thrownBy mojo.execute()
+    a [MojoFailureException] should be thrownBy mojo.execute()
   }
 
   it should "add a resource to the Maven project" in { rule =>
