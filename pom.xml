@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ottogroup</groupId>
+    <groupId>com.ottogroup.emfavro</groupId>
     <artifactId>emf-avro</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -12,6 +12,7 @@
         <module>ecore-avro</module>
         <module>ecore-avro-maven-plugin</module>
         <module>eobject-record</module>
+        <module>emf-avro-doc</module>
     </modules>
 
     <properties>
@@ -83,7 +84,9 @@
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
                     <version>3.2.2</version>
-
+                    <configuration>
+                        <scalaCompatVersion>${scala.version}</scalaCompatVersion>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.scalatest</groupId>
@@ -94,6 +97,26 @@
                             <phase>test</phase>
                             <goals>
                                 <goal>test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.7.9</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
                             </goals>
                         </execution>
                     </executions>
