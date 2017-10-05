@@ -22,19 +22,19 @@ object Ecore2Avro {
     protocol
   }
 
-  def shouldBeConverted(eClassifier: EClassifier): Boolean = eClassifier match {
+  val shouldBeConverted: EClassifier => Boolean = {
     case eClass: EClass => !eClass.isAbstract
     case _: EEnum => true
     case _: EDataType => false
   }
 
   def toAvroSchema(classifier: EClassifier, basePackage: String, model: GenModel): Schema = classifier match {
-    case e: EEnum => toAvroSchema(e, basePackage, model)
+    case e: EEnum => toAvroSchema(e, basePackage)
     case c: EClass => toAvroSchema(c, basePackage, model)
-    case dt: EDataType => toAvroSchema(dt, basePackage, model)
+    case dt: EDataType => toAvroSchema(dt)
   }
 
-  def toAvroSchema(enum: EEnum, basePackage: String, genModel: GenModel): Schema = Schema.createEnum(
+  def toAvroSchema(enum: EEnum, basePackage: String): Schema = Schema.createEnum(
     enum.getName, null, s"$basePackage.${enum.getEPackage.getName}.avro",
     enum.getELiterals.asScala.map(_.getName).asJava
   )
@@ -44,7 +44,7 @@ object Ecore2Avro {
     eClass.getEAllStructuralFeatures.asScala.map(toAvroField(_, basePackage, genModel)).asJava
   )
 
-  def toAvroSchema(dataType: EDataType, basePackage: String, genModel: GenModel): Schema = dataType match {
+  def toAvroSchema(dataType: EDataType): Schema = dataType match {
     case EcorePackage.Literals.EBOOLEAN => Schema.create(Schema.Type.BOOLEAN)
     case EcorePackage.Literals.EINT => Schema.create(Schema.Type.INT)
     case EcorePackage.Literals.ELONG => Schema.create(Schema.Type.LONG)

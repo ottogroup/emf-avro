@@ -12,6 +12,7 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +30,12 @@ public class Ecore2AvroMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        GenModel model = GenModelLoader.load(genModel.toPath());
+        GenModel model;
+        try {
+            model = GenModelLoader.load(genModel.toPath());
+        } catch (FileNotFoundException e) {
+            throw new MojoFailureException("Could not open GenModel file", e);
+        }
         getLog().info("Processing " + model.getGenPackages().size() + " GenPackages");
 
         Protocol protocol = Ecore2Avro.convert(model);
