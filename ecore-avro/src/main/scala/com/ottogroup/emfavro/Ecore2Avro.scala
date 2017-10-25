@@ -44,7 +44,7 @@ object Ecore2Avro {
     eClass.getEAllStructuralFeatures.asScala.map(toAvroField(_, basePackage, genModel)).asJava
   )
 
-  def toAvroSchema(dataType: EDataType): Schema = dataType match {
+  val toAvroSchema: EDataType => Schema = {
     case EcorePackage.Literals.EBOOLEAN => Schema.create(Schema.Type.BOOLEAN)
     case EcorePackage.Literals.EINT => Schema.create(Schema.Type.INT)
     case EcorePackage.Literals.ELONG => Schema.create(Schema.Type.LONG)
@@ -86,16 +86,14 @@ object Ecore2Avro {
     new Schema.Field(ref.getName, schema, null, null.asInstanceOf[Object])
   }
 
-  def findImplementations(interface: EClass, genModel: GenModel): Iterable[EClassifier] =
+  def findImplementations(interface: EClass, genModel: GenModel): Iterable[_ <: EClass] =
     genModel.getGenPackages.asScala
       .flatMap(_.getEcorePackage.getEClassifiers.asScala)
-      .filter(_.isInstanceOf[EClass])
+      .collect { case x: EClass => x }
       .filter(_ implements interface)
 
-  implicit class RichEClassifier(val eClassifier: EClassifier) extends AnyRef {
-    def implements(interface: EClass): Boolean = eClassifier match {
-      case eClass: EClass => !eClass.isAbstract && !eClass.isInterface && interface.isSuperTypeOf(eClass)
-      case _ => false
-    }
+  implicit class RichEClass(val eClass: EClass) extends AnyRef {
+    def implements(interface: EClass): Boolean =
+      !eClass.isAbstract && !eClass.isInterface && interface.isSuperTypeOf(eClass)
   }
 }

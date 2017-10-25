@@ -2,7 +2,7 @@ package com.ottogroup.emfavro
 
 import java.util.Date
 
-import com.ottogroup.emfavro.Ecore2Avro.RichEClassifier
+import com.ottogroup.emfavro.Ecore2Avro.RichEClass
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Type
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelFactory
