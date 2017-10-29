@@ -47,6 +47,7 @@ public class Ecore2AvroMojo extends AbstractMojo {
         outputPath = outputPath.resolve(protocol.getName() + ".avpr");
 
         try {
+            getLog().debug("Writing protocol to " + outputPath.toString());
             Files.createDirectories(outputPath.getParent());
             Files.write(outputPath, protocol.toString().getBytes());
         } catch (IOException e) {

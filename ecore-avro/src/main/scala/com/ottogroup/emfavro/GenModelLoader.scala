@@ -12,8 +12,6 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl
 object GenModelLoader {
   @throws[FileNotFoundException]
   def load(path: Path): GenModel = {
-    require(path != null, "path must not be null")
-
     GenModelPackage.eINSTANCE.getGenModel
 
     val resourceSet = new ResourceSetImpl

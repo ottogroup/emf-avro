@@ -1,10 +1,12 @@
 package com.ottogroup.emfavro
 
+import java.io._
+import java.nio.file.Paths
 import java.util.Date
 
 import com.ottogroup.emfavro.Ecore2Avro.RichEClass
-import org.apache.avro.Schema
 import org.apache.avro.Schema.Type
+import org.apache.avro.{Protocol, Schema}
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelFactory
 import org.eclipse.emf.ecore.{EcoreFactory, EcorePackage}
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
@@ -13,7 +15,7 @@ import scala.collection.JavaConverters._
 
 class Ecore2AvroSpec extends FlatSpec with Matchers with GivenWhenThen {
   "The Ecore2Avro converter" should "throw an IllegalArgumentException for a null parameter" in {
-    a [IllegalArgumentException] should be thrownBy Ecore2Avro.convert(null)
+    a[IllegalArgumentException] should be thrownBy Ecore2Avro.convert(null)
   }
 
   it should "throw a IllegalArgumentException if there is no genpackage" in {
@@ -23,7 +25,7 @@ class Ecore2AvroSpec extends FlatSpec with Matchers with GivenWhenThen {
 
     When("it is converted")
     Then("an IllegalArgumentException should be thrown")
-    a [IllegalArgumentException] should be thrownBy Ecore2Avro.convert(genModel)
+    a[IllegalArgumentException] should be thrownBy Ecore2Avro.convert(genModel)
   }
 
   it should "not mark neither abstract classes nor data types to be converted" in {
@@ -207,7 +209,7 @@ class Ecore2AvroSpec extends FlatSpec with Matchers with GivenWhenThen {
     field shouldNot be(null)
     field.name shouldEqual "ref"
     field.schema.getType should be(Type.UNION)
-    field.schema.getTypes should contain only (impl1Schema, impl2Schema)
+    field.schema.getTypes should contain only(impl1Schema, impl2Schema)
   }
 
   it should "find implementations for an interface" in {
@@ -401,5 +403,52 @@ class Ecore2AvroSpec extends FlatSpec with Matchers with GivenWhenThen {
     field.name shouldEqual "listOfStrings"
     field.schema.getType should be(Type.ARRAY)
     field.schema.getElementType.getType should be(Type.STRING)
+  }
+
+  it should "convert a complete genmodel correctly" in {
+    Given("a sample genmodel with some stuff")
+    val genModelPath = Paths.get(getClass.getResource("/test.genmodel").toURI)
+    val genModel = GenModelLoader.load(genModelPath)
+
+    When("it is converted")
+    val protocol = Ecore2Avro.convert(genModel)
+
+    Then("it should be converted correctly")
+    protocol should not be null
+    protocol.getName shouldEqual "Test"
+    protocol.getNamespace shouldEqual "base"
+    protocol.getMessages shouldBe empty
+    protocol.getTypes should have size 5
+    protocol.getType("base.test.avro.WeekDay").getType should be(Type.ENUM)
+    protocol.getType("base.test.avro.Primitives").getType should be(Type.RECORD)
+    protocol.getType("base.test.avro.Referencer").getType should be(Type.RECORD)
+    protocol.getType("base.test.avro.InterfaceImpl1").getType should be(Type.RECORD)
+    protocol.getType("base.test.avro.InterfaceImpl2").getType should be(Type.RECORD)
+  }
+
+  it should "convert a given genmodel file to the main method correctly" in {
+    Given("a sample genmodel with some stuff")
+    val genModelPath = Paths.get(getClass.getResource("/test.genmodel").toURI)
+    val outStream = new ByteArrayOutputStream
+    val printStream = new PrintStream(outStream, true)
+
+    When("the main method is called with 1 parameter")
+    System.setOut(printStream)
+    Ecore2Avro.main(Array(genModelPath.toString))
+    System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)))
+
+    Then("it should be converted correctly")
+    val protocolStr = new String(outStream.toByteArray)
+    val protocol = Protocol.parse(protocolStr)
+    protocol should not be null
+    protocol.getName shouldEqual "Test"
+    protocol.getNamespace shouldEqual "base"
+    protocol.getMessages shouldBe empty
+    protocol.getTypes should have size 5
+    protocol.getType("base.test.avro.WeekDay").getType should be(Type.ENUM)
+    protocol.getType("base.test.avro.Primitives").getType should be(Type.RECORD)
+    protocol.getType("base.test.avro.Referencer").getType should be(Type.RECORD)
+    protocol.getType("base.test.avro.InterfaceImpl1").getType should be(Type.RECORD)
+    protocol.getType("base.test.avro.InterfaceImpl2").getType should be(Type.RECORD)
   }
 }

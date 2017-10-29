@@ -7,8 +7,8 @@ import org.eclipse.emf.common.util.WrappedException
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 
 class GenModelLoaderSpec extends FlatSpec with GivenWhenThen with Matchers {
-  "A GenModelLoader" should "throw an IllegalArgumentException for a null parameter" in {
-    a [IllegalArgumentException] should be thrownBy GenModelLoader.load(null)
+  "A GenModelLoader" should "throw an NullPointerException for a null parameter" in {
+    a[NullPointerException] should be thrownBy GenModelLoader.load(null)
   }
 
   it should "throw a FileNotFoundException if the path is not existent" in {

@@ -1,5 +1,7 @@
 package com.ottogroup.emfavro
 
+import java.nio.file.Paths
+
 import org.apache.avro.{Protocol, Schema}
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel
 import org.eclipse.emf.ecore._
@@ -7,6 +9,17 @@ import org.eclipse.emf.ecore._
 import scala.collection.JavaConverters._
 
 object Ecore2Avro {
+  def main(args: Array[String]): Unit = {
+    if (args.isEmpty) {
+      System.err.println("Please specify a GenModel file to convert.")
+      System.exit(1)
+    }
+
+    val genModel = GenModelLoader.load(Paths.get(args.head))
+    val protocol = Ecore2Avro.convert(genModel)
+    System.out.println(protocol.toString)
+  }
+
   def convert(genModel: GenModel): Protocol = {
     require(genModel != null, "genModel must not be null")
     require(!genModel.getGenPackages.isEmpty, "genModel must contains at least 1 GenPackage")
