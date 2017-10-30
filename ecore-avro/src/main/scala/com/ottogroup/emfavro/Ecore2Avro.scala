@@ -12,7 +12,7 @@ object Ecore2Avro {
   def main(args: Array[String]): Unit = {
     if (args.isEmpty) {
       System.err.println("Please specify a GenModel file to convert.")
-      System.exit(1)
+      sys.exit(1)
     }
 
     val genModel = GenModelLoader.load(Paths.get(args.head))
@@ -104,9 +104,4 @@ object Ecore2Avro {
       .flatMap(_.getEcorePackage.getEClassifiers.asScala)
       .collect { case x: EClass => x }
       .filter(_ implements interface)
-
-  implicit class RichEClass(val eClass: EClass) extends AnyRef {
-    def implements(interface: EClass): Boolean =
-      !eClass.isAbstract && !eClass.isInterface && interface.isSuperTypeOf(eClass)
-  }
 }

@@ -5,30 +5,12 @@ import java.io.File
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugin.testing.MojoRule
 import org.apache.maven.project.MavenProject
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
 import org.scalatest._
 
-class Ecore2AvroMojoSpec extends fixture.FlatSpec with GivenWhenThen with Matchers {
+class Ecore2AvroMojoSpec extends FlatSpec with GivenWhenThen with Matchers with JUnitRules {
   private val unitdir = new File("src/test/resources/unit")
 
-  type FixtureParam = MojoRule
-
-  override def withFixture(test: OneArgTest): Outcome = {
-    val rule = new MojoRule()
-    var outcome: Outcome = null
-
-    rule(
-      new Statement() {
-        override def evaluate(): Unit =
-          outcome = withFixture(test.toNoArgTest(rule))
-      }, Description.createSuiteDescription("JUnit rule wrapper")
-    ).evaluate()
-
-    outcome
-  }
-
-  "The Ecore2AvroMojo" should "create an output file" in { rule =>
+  "The Ecore2AvroMojo" should "create an output file" in withRule(new MojoRule) { rule =>
     Given("A correctly configured mojo")
     val basedir = new File(unitdir, "fine")
     val mojo = rule.lookupMojo("generate", new File(basedir, "pom.xml"))
@@ -42,7 +24,7 @@ class Ecore2AvroMojoSpec extends fixture.FlatSpec with GivenWhenThen with Matche
     outputFile should exist
   }
 
-  it should "throw a MojoFailureException for a nonexisting genmodel" in { rule =>
+  it should "throw a MojoFailureException for a nonexisting genmodel" in withRule(new MojoRule) { rule =>
     Given("A configured mojo pointing at a nonexisting genmodel file")
     val basedir = new File(unitdir, "nonexisting_genmodel")
     val mojo = rule.lookupMojo("generate", new File(basedir, "pom.xml"))
@@ -53,7 +35,7 @@ class Ecore2AvroMojoSpec extends fixture.FlatSpec with GivenWhenThen with Matche
     a [MojoFailureException] should be thrownBy mojo.execute()
   }
 
-  it should "add a resource to the Maven project" in { rule =>
+  it should "add a resource to the Maven project" in withRule(new MojoRule) { rule =>
     Given("A correctly configured mojo")
     val basedir = new File(unitdir, "fine")
     val mojo = rule.lookupMojo("generate", new File(basedir, "pom.xml"))

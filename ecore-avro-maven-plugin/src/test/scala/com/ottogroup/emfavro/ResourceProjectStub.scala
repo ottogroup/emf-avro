@@ -11,7 +11,7 @@ import scala.collection.mutable
 class ResourceProjectStub extends MavenProjectStub {
   private val resources = mutable.Set[Resource]()
 
-  override def addResource(resource: Resource): Unit = resources.+=(resource)
+  override def addResource(resource: Resource): Unit = resources += resource
 
   override def getResources: util.List[Resource] = resources.toList.asJava
 }
