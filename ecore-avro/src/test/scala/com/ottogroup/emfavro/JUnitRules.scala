@@ -9,6 +9,6 @@ trait JUnitRules {
     new Statement {
       override def evaluate(): Unit = test(rule)
     },
-    Description.createSuiteDescription("JUnit rule wrapper")
+    Description.createSuiteDescription(getClass)
   ).evaluate()
 }
